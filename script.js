@@ -1,8 +1,20 @@
-// Public Countdown Script for index.html
+// --- CONFIGURACIÓN DE SUPABASE ---
+const SUPABASE_URL = 'https://ahlxqxoyeourtjzfdmxx.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFobHhxeG95ZW91cnRqemZkbXh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwNjI3NTUsImV4cCI6MjEwODYzODc1NX0.3GVmgce9GpThgcbMMDiKTTAsbL_nKa2tt3D8GEjyBxE';
+
+// Inicializar cliente de Supabase
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Guardaremos el ID del jugador actual temporalmente
+let currentSessionPlayerId = null;
+
+// Public Countdown Script para index.html
 function startPublicCountdown(durationSeconds) {
     let timer = durationSeconds;
     const display = document.getElementById('countdown');
     const overlay = document.getElementById('expired-overlay');
+
+    if (!display) return;
 
     const interval = setInterval(() => {
         let hours = Math.floor(timer / 3600);
@@ -23,29 +35,49 @@ function startPublicCountdown(durationSeconds) {
     }, 1000);
 }
 
-// Global variables for Day 1 Game
-let gameInterval;
-let currentTimeLeft = 60.00;
-let gameActive = false;
-
-// Authorize Player ID in play.html
-function authorizePlayer() {
+// --- AUTORIZACIÓN DE JUGADOR (CONECTADO A SUPABASE) ---
+async function authorizePlayer() {
     const inputId = document.getElementById('player-id-input').value.trim();
     
-    // Basic validation check for format (e.g., must start with T9)
     if (!inputId.startsWith("T9-") || inputId.length < 9) {
         alert("Invalid Player ID format. Access denied.");
         return;
     }
 
-    // Switch screens from Login to Game
+    // Consultar Supabase para verificar si el jugador existe y su estado
+    const { data, error } = await supabaseClient
+        .from('players')
+        .select('*')
+        .eq('player_id', inputId)
+        .single();
+
+    if (error || !data) {
+        alert("Player ID not found in database. Did you complete registration?");
+        return;
+    }
+
+    // Si ya está eliminado
+    if (data.status === 'eliminated') {
+        document.getElementById('login-container').classList.add('hidden');
+        document.getElementById('fail-overlay').style.display = "flex";
+        return;
+    }
+
+    // Guardar sesión actual
+    currentSessionPlayerId = inputId;
+
+    // Cambiar de pantalla de Login al Juego de Día 1
     document.getElementById('login-container').classList.add('hidden');
     document.getElementById('game-container').classList.remove('hidden');
 
     startDayOneGame();
 }
 
-// Day 1 Game Mechanics: Click at exactly 07.00s
+// --- MECÁNICAS DEL JUEGO (DÍA 1) ---
+let gameInterval;
+let currentTimeLeft = 60.00;
+let gameActive = false;
+
 function startDayOneGame() {
     gameActive = true;
     currentTimeLeft = 60.00;
@@ -56,29 +88,42 @@ function startDayOneGame() {
         if (currentTimeLeft <= 0) {
             currentTimeLeft = 0.00;
             clearInterval(gameInterval);
-            if (gameActive) triggerFailState(); // Ran out of time
+            if (gameActive) triggerFailState(); 
         }
         display.textContent = currentTimeLeft.toFixed(2) + "s";
     }, 50);
 }
 
-function executeTrial() {
+async function executeTrial() {
     if (!gameActive) return;
     gameActive = false;
     clearInterval(gameInterval);
 
-    // Winning condition: must click between 07.00s and 07.99s remaining
+    // Condición de victoria: Clic entre 07.00s y 07.99s restantes
     if (currentTimeLeft >= 7.00 && currentTimeLeft <= 7.99) {
+        // Actualizar base de datos: pasa al Día 2
+        await supabaseClient
+            .from('players')
+            .update({ current_day: 2 })
+            .eq('player_id', currentSessionPlayerId);
+
         document.getElementById('pass-overlay').style.display = "flex";
-        // TODO: Backend hook to update database current_day = 2
     } else {
         triggerFailState();
     }
 }
 
-function triggerFailState() {
+async function triggerFailState() {
     gameActive = false;
     clearInterval(gameInterval);
+
+    // Actualizar base de datos: estatus eliminado
+    if (currentSessionPlayerId) {
+        await supabaseClient
+            .from('players')
+            .update({ status: 'eliminated' })
+            .eq('player_id', currentSessionPlayerId);
+    }
+
     document.getElementById('fail-overlay').style.display = "flex";
-    // TODO: Backend hook to flip status = 'eliminated'
 }
