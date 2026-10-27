@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminal 9 | Instructions</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <div class="glass-card">
+            <span style="font-family: monospace; color: var(--neon-cyan); font-size: 0.8rem; letter-spacing: 1px;">SYSTEM PROTOCOL: ACTIVE</span>
+            <h1 style="margin-top: 0.5rem;">TRIAL 01: THE PATIENCE FILTER</h1>
+            <p>“Discipline is the first metric of survival. Nothing is accidental. Keep a notebook—what you observe throughout the week may dictate your survival in the Vault.”</p>
+            
+            <div style="margin: 1.5rem 0;">
+                <span style="font-size: 0.85rem; color: var(--text-muted);">TIME REMAINING FOR DAY 01</span>
+                <div id="countdown" class="timer-display">19:59:59</div>
+            </div>
+
+            <p style="font-size: 0.85rem;">When the timer expires, the portal seals permanently and inactive subjects are purged.</p>
+            
+            <a href="play.html" style="text-decoration: none;">
+                <button style="margin-top: 1rem;">ACCESS GAME PORTAL</button>
+            </a>
+        </div>
+    </div>
+
+    <!-- Expired Overlay (Triggers if timer hits zero) -->
+    <div id="expired-overlay" class="overlay">
+        <div class="overlay-content eliminated">
+            <h2>DAY 01 HAS ENDED</h2>
+            <p>Portal sealed. Inactive parameters purged.</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Initialize public countdown timer (20 Hours mock setup)
+        startPublicCountdown(20 * 60 * 60); 
+    </script>
+</body>
+</html>
