@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminal 9 | Game Portal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- STEP 1: Login Screen -->
+    <div id="login-container" class="container">
+        <div class="glass-card">
+            <h1>AUTHORIZE SESSION</h1>
+            <p>Input your Unique Player ID to enter Trial 01.</p>
+            <input type="text" id="player-id-input" placeholder="T9-XX-XXXX" autocomplete="off">
+            <button onclick="authorizePlayer()">ENTER TERMINAL</button>
+        </div>
+    </div>
+
+    <!-- STEP 2: Day 1 Game Screen (Hidden initially) -->
+    <div id="game-container" class="container hidden">
+        <div class="glass-card">
+            <h1>THE PATIENCE FILTER</h1>
+            <p>A timer counts down from 60 seconds. You must click the trigger when the clock reads <strong>EXACTLY 07 seconds</strong>.</p>
+            
+            <div id="game-timer" class="timer-display">60.00s</div>
+            
+            <button id="trigger-btn" onclick="executeTrial()" style="background: var(--neon-cyan); color: var(--bg-color);">TRIGGER AT 07.00s</button>
+        </div>
+    </div>
+
+    <!-- STEP 3: Pass / Fail Result Overlays -->
+    <div id="pass-overlay" class="overlay">
+        <div class="overlay-content passed">
+            <h2>YOU PASSED</h2>
+            <p>Secure transmission logged. Stand by for Day 02 protocol.</p>
+        </div>
+    </div>
+
+    <div id="fail-overlay" class="overlay">
+        <div class="overlay-content eliminated">
+            <h2>YOU GOT ELIMINATED</h2>
+            <p>You can't login back, you made it until Day 1.</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
