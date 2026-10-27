@@ -35,95 +35,37 @@ function startPublicCountdown(durationSeconds) {
     }, 1000);
 }
 
-// --- AUTORIZACIÓN DE JUGADOR (CONECTADO A SUPABASE) ---
+// --- AUTORIZACIÓN DE JUGADOR (CON RAYOS X PARA CELULAR) ---
 async function authorizePlayer() {
     const inputId = document.getElementById('player-id-input').value.trim();
     
     if (!inputId.startsWith("T9-") || inputId.length < 9) {
-        alert("Invalid Player ID format. Access denied.");
+        alert("El ID debe empezar con T9- y ser válido.");
         return;
     }
 
-    // Consultar Supabase para verificar si el jugador existe y su estado
+    alert("Intentando buscar el ID: [" + inputId + "]");
+
+    // Consultar Supabase
     const { data, error } = await supabaseClient
         .from('players')
         .select('*')
-        .eq('player_id', inputId)
-        .single();
+        .eq('player_id', inputId);
 
-    if (error || !data) {
-        alert("Player ID not found in database. Did you complete registration?");
+    if (error) {
+        alert("Error de Supabase: " + error.message);
         return;
     }
 
-    // Si ya está eliminado
-    if (data.status === 'eliminated') {
-        document.getElementById('login-container').classList.add('hidden');
-        document.getElementById('fail-overlay').style.display = "flex";
+    alert("Supabase respondió. Registros encontrados: " + (data ? data.length : 0));
+
+    if (!data || data.length === 0) {
+        alert("La tabla 'players' no tiene ningún registro con el campo 'player_id' igual a: " + inputId);
         return;
     }
 
-    // Guardar sesión actual
-    currentSessionPlayerId = inputId;
+    const player = data[0]; 
+    alert("¡Encontrado! Estado actual: " + player.status);
 
-    // Cambiar de pantalla de Login al Juego de Día 1
-    document.getElementById('login-container').classList.add('hidden');
-    document.getElementById('game-container').classList.remove('hidden');
-
-    startDayOneGame();
-}
-
-// --- MECÁNICAS DEL JUEGO (DÍA 1) ---
-let gameInterval;
-let currentTimeLeft = 60.00;
-let gameActive = false;
-
-function startDayOneGame() {
-    gameActive = true;
-    currentTimeLeft = 60.00;
-    const display = document.getElementById('game-timer');
-
-    gameInterval = setInterval(() => {
-        currentTimeLeft -= 0.05;
-        if (currentTimeLeft <= 0) {
-            currentTimeLeft = 0.00;
-            clearInterval(gameInterval);
-            if (gameActive) triggerFailState(); 
-        }
-        display.textContent = currentTimeLeft.toFixed(2) + "s";
-    }, 50);
-}
-
-async function executeTrial() {
-    if (!gameActive) return;
-    gameActive = false;
-    clearInterval(gameInterval);
-
-    // Condición de victoria: Clic entre 07.00s y 07.99s restantes
-    if (currentTimeLeft >= 7.00 && currentTimeLeft <= 7.99) {
-        // Actualizar base de datos: pasa al Día 2
-        await supabaseClient
-            .from('players')
-            .update({ current_day: 2 })
-            .eq('player_id', currentSessionPlayerId);
-
-        document.getElementById('pass-overlay').style.display = "flex";
-    } else {
-        triggerFailState();
-    }
-}
-
-async function triggerFailState() {
-    gameActive = false;
-    clearInterval(gameInterval);
-
-    // Actualizar base de datos: estatus eliminado
-    if (currentSessionPlayerId) {
-        await supabaseClient
-            .from('players')
-            .update({ status: 'eliminated' })
-            .eq('player_id', currentSessionPlayerId);
-    }
-
-    document.getElementById('fail-overlay').style.display = "flex";
-}
+    if (player.status === 'eliminated') {
+        document.getElementById('login-container').classList
