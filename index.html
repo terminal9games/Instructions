@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TERMINAL 9 - Instructions</title>
-    <!-- Favicon -->
     <link rel="icon" type="image/jpeg" href="https://i.postimg.cc/bJhgw2zd/Gemini-Generated-Image-kl9ro8kl9ro8kl9r.jpg">
     
-    <!-- Google Fonts: Montserrat & Montaser/Montserrat Arabic -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,700;0,900;1,400&family=Montserrat+Arabic:wght@700;900&display=swap" rel="stylesheet">
@@ -32,7 +30,7 @@
             overflow-x: hidden;
         }
 
-        /* TEMPORIZADOR ROJO SUPERIOR (Montaser Arabic) */
+        /* TIMER CONTAINER - FIXED SIZE & TABULAR NUMBERS */
         .timer-header-wrapper {
             width: 100%;
             display: flex;
@@ -52,12 +50,16 @@
             display: flex;
             gap: 30px;
             box-shadow: 0 0 25px rgba(255, 0, 0, 0.4);
+            /* Prevents container width movement */
+            width: 340px;
+            justify-content: center;
         }
 
         .timer-block {
             display: flex;
             flex-direction: column;
             align-items: center;
+            width: 70px; /* Fixed block width */
         }
 
         .timer-digit {
@@ -67,6 +69,11 @@
             color: #e60000;
             line-height: 1;
             text-shadow: 0 0 15px rgba(255, 0, 0, 0.7);
+            /* Equal width font spacing prevents horizontal jitter */
+            font-variant-numeric: tabular-nums;
+            display: inline-block;
+            text-align: center;
+            min-width: 2.2ch;
         }
 
         .timer-label {
@@ -76,7 +83,7 @@
             margin-top: 4px;
         }
 
-        /* TARJETA DE INSTRUCCIONES (Imagen 1) */
+        /* CARD INSTRUCTIONS */
         .card-container {
             width: 90%;
             max-width: 900px;
@@ -141,7 +148,6 @@
 </head>
 <body>
 
-    <!-- TEMPORIZADOR ROJO 20:00:00 -->
     <div class="timer-header-wrapper">
         <div class="timer-container">
             <div class="timer-block">
@@ -159,7 +165,6 @@
         </div>
     </div>
 
-    <!-- TARJETA INSTRUCCIONES -->
     <div class="card-container">
         <div class="logo-header">
             <img src="https://i.postimg.cc/bJhgw2zd/Gemini-Generated-Image-kl9ro8kl9ro8kl9r.jpg" alt="Logo" class="logo-img">
