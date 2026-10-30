@@ -33,26 +33,37 @@
 <main>
   <div class="brand"><img src="https://i.postimg.cc/bJhgw2zd/Gemini-Generated-Image-kl9ro8kl9ro8kl9r.jpg" alt=""> TERMINAL 9</div>
   <h1 id="title">DAY 1</h1>
-  <p Press the button once the timer hits 7 Seconds.</p>
+  <p id="text">Here goes the instructions in montserrat font</p>
 </main>
 <small>*If you are a player, dont let the timer runs out.</small>
 <script>
-  // ===== EDIT EACH DAY =====
-  const DAY = 1;
-  const TEXT = "Here goes the instructions in montserrat font";
-  // Set the moment the 20h window ends (ISO, with timezone):
-  const END = new Date("2026-10-30T20:00:00-05:00");
-  // =========================
-  document.getElementById('title').textContent = 'DAY ' + DAY;
-  document.getElementById('text').textContent = TEXT;
-  const pad = n => String(n).padStart(2,'0');
-  function tick() {
-    let t = Math.max(0, Math.floor((END - Date.now())/1000));
-    h.textContent = pad(Math.floor(t/3600));
-    m.textContent = pad(Math.floor(t%3600/60));
-    s.textContent = pad(t%60);
+  // ===== EDIT =====
+  const GAME = "https://playportal9.vercel.app";   // URL of the game site (the timer comes from its server)
+  const TEXTS = {                                  // text shown for each day
+    1:"Press the button when the timer hits 7 seconds.",
+    2: "Select share or steal with a random player, if both select share, you pass, if one selects share and the other one selects steal, steal pass, if both select steal, both get eliminated. Think carefully and trust what you think.",
+    3: "Day 3 instructions go here"
+  };
+  // ================
+  const $ = id => document.getElementById(id);
+  const pad = n => String(n).padStart(2, '0');
+  let endsAt = null, offset = 0;
+  async function sync() {
+    try {
+      const d = await (await fetch(GAME + '/api/status', { cache: 'no-store' })).json();
+      offset = d.now - Date.now(); endsAt = d.endsAt;
+      $('title').textContent = 'DAY ' + d.day;
+      $('text').textContent = TEXTS[d.day] || '';
+    } catch {}
   }
-  tick(); setInterval(tick, 500);
+  function tick() {
+    if (!endsAt) { $('h').textContent = $('m').textContent = $('s').textContent = '--'; return; }
+    const t = Math.max(0, Math.floor((endsAt - (Date.now() + offset)) / 1000));
+    $('h').textContent = pad(Math.floor(t / 3600));
+    $('m').textContent = pad(Math.floor(t % 3600 / 60));
+    $('s').textContent = pad(t % 60);
+  }
+  sync(); setInterval(sync, 15000); setInterval(tick, 250); tick();
 </script>
 </body>
 </html>
