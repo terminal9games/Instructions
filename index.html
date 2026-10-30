@@ -7,7 +7,7 @@
 <link rel="icon" href="https://i.postimg.cc/bJhgw2zd/Gemini-Generated-Image-kl9ro8kl9ro8kl9r.jpg">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Montserrat+Alternates:wght@700&display=swap" rel="stylesheet">
 <style>
-  :root { --red:#ff0055; --glass:rgba(255,255,255,.03); }
+  :root { --red:#ff0055; --cyan:#00f3ff; --green:#39ff14; --glass:rgba(255,255,255,.03); }
   * { box-sizing:border-box; }
   body { margin:0; min-height:100vh; background:radial-gradient(ellipse at top,#14141a 0%,#0a0a0c 60%); color:#fff; font-family:'Montserrat',sans-serif; display:flex; flex-direction:column; align-items:center; }
   .timer { display:flex; gap:18px; padding:10px 46px 12px; border:1px solid rgba(255,0,85,.35); border-top:0; border-radius:0 0 40px 40px; background:var(--glass); backdrop-filter:blur(16px); }
@@ -20,8 +20,17 @@
   h1 { font-size:16px; margin:34px 0 22px; }
   p { font-size:15px; line-height:1.6; margin:0; }
   small { font-size:11px; color:#ddd; }
+  /* fullscreen notice */
+  #fs { position:fixed; inset:0; z-index:9; display:none; padding:34px; background:rgba(0,0,0,.72); backdrop-filter:blur(14px); }
+  #fs.on { display:block; animation:in .7s ease both; }
+  #fs .box { height:100%; border:3px solid var(--cyan); border-radius:14px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; position:relative; padding:20px; box-shadow:0 0 22px rgba(0,243,255,.5), inset 0 0 22px rgba(0,243,255,.2); }
+  #fs .brand { position:absolute; top:20px; }
+  #fs h2 { margin:0; font-size:clamp(24px,6vw,40px); color:var(--cyan); text-shadow:0 0 18px var(--cyan); }
+  #fs .row { display:flex; gap:14px; flex-wrap:wrap; justify-content:center; margin-top:26px; }
+  #fs button { padding:14px 34px; font:700 16px 'Montserrat',sans-serif; color:#fff; background:rgba(255,255,255,.04); border:2px solid rgba(255,255,255,.45); border-radius:12px; cursor:pointer; }
+  #fsGo { border-color:var(--green)!important; color:var(--green)!important; text-shadow:0 0 10px var(--green); box-shadow:0 0 16px rgba(57,255,20,.4); }
   @keyframes in { from { opacity:0; transform:scale(.97); } to { opacity:1; transform:none; } }
-  @media (prefers-reduced-motion:reduce) { main { animation:none; } }
+  @media (prefers-reduced-motion:reduce) { main,#fs.on { animation:none; } }
 </style>
 </head>
 <body>
@@ -36,6 +45,13 @@
   <p id="text">Here goes the instructions in montserrat font</p>
 </main>
 <small>*If you are a player, dont let the timer runs out.</small>
+
+<div id="fs" role="dialog" aria-label="Fullscreen recommended"><div class="box">
+  <div class="brand"><img src="https://i.postimg.cc/bJhgw2zd/Gemini-Generated-Image-kl9ro8kl9ro8kl9r.jpg" alt=""> TERMINAL 9</div>
+  <h2>We recommend you to play in fullscreen</h2>
+  <div class="row"><button id="fsGo">Go fullscreen</button><button id="fsNo">Not now</button></div>
+</div></div>
+
 <script>
   // ===== EDIT =====
   const GAME = "https://playportal9.vercel.app";   // URL of the game site (the timer comes from its server)
@@ -43,7 +59,8 @@
     1: "Press the red button,once the timer hits 7 seconds.",
     2: "Select share or steal. If both players selects share, both pass. If one selects share and the other one selects steal, steal pass. If both selects steal, you get eliminated. You also have a chat where you can talk with your random partner. Good luck and trust your mind.",
     3: "Select a number from the slider from 0 to 100, a formula is applied to your selected number, if your number goes near of 100 without passing 100 you pass, if your number is a very low number than other players or pass from 100 you get eliminated. Think carefully.",
-    4: "Sound and some clues, think harder and you'll get the answer."
+    4: "Sound and some clues, think harder and you'll get the answer.",
+    5: "Watch the colored pads light up, then repeat the sequence by pressing them in the same order. Each level adds one more step. One mistake and you are eliminated. Repeat the full sequence to pass."
   };
   // ================
   const $ = id => document.getElementById(id);
@@ -65,6 +82,14 @@
     $('s').textContent = pad(t % 60);
   }
   sync(); setInterval(sync, 5000); setInterval(tick, 250); tick();
+
+  // Fullscreen notice: browsers only allow fullscreen after a click, so the page asks first.
+  {
+    const el = document.documentElement, req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (req && !document.fullscreenElement && !document.webkitFullscreenElement) $('fs').classList.add('on');
+    $('fsGo').onclick = () => { try { Promise.resolve(req.call(el)).catch(() => {}); } catch {} $('fs').classList.remove('on'); };
+    $('fsNo').onclick = () => $('fs').classList.remove('on');
+  }
 </script>
 </body>
 </html>
