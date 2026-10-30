@@ -40,30 +40,31 @@
   // ===== EDIT =====
   const GAME = "https://playportal9.vercel.app";   // URL of the game site (the timer comes from its server)
   const TEXTS = {                                  // text shown for each day
-    1:"Press the button when the timer hits 7 seconds.",
-    2: "Select share or steal with a random player, if both select share, you pass, if one selects share and the other one selects steal, steal pass, if both select steal, both get eliminated. Think carefully and trust what you think.",
-    3: "Day 3 instructions go here"
+    1: "Here goes the instructions in montserrat font",
+    2: "Day 2 instructions go here",
+    3: "Day 3 instructions go here",
+    4: "Day 4 instructions go here"
   };
   // ================
   const $ = id => document.getElementById(id);
   const pad = n => String(n).padStart(2, '0');
-  let endsAt = null, offset = 0;
+  let endsAt = null, offset = 0, closed = false;
   async function sync() {
     try {
       const d = await (await fetch(GAME + '/api/status', { cache: 'no-store' })).json();
-      offset = d.now - Date.now(); endsAt = d.endsAt;
+      offset = d.now - Date.now(); endsAt = d.endsAt; closed = d.closed;
       $('title').textContent = 'DAY ' + d.day;
       $('text').textContent = TEXTS[d.day] || '';
     } catch {}
   }
   function tick() {
-    if (!endsAt) { $('h').textContent = $('m').textContent = $('s').textContent = '--'; return; }
-    const t = Math.max(0, Math.floor((endsAt - (Date.now() + offset)) / 1000));
+    if (!endsAt && !closed) { $('h').textContent = $('m').textContent = $('s').textContent = '--'; return; }
+    const t = closed ? 0 : Math.max(0, Math.floor((endsAt - (Date.now() + offset)) / 1000));
     $('h').textContent = pad(Math.floor(t / 3600));
     $('m').textContent = pad(Math.floor(t % 3600 / 60));
     $('s').textContent = pad(t % 60);
   }
-  sync(); setInterval(sync, 15000); setInterval(tick, 250); tick();
+  sync(); setInterval(sync, 5000); setInterval(tick, 250); tick();
 </script>
 </body>
 </html>
